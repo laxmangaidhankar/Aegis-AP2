@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Authoritative Policy & Audit Ledger Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: aegis-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: aegis_ap2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./policy-engine-spring/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  # 2. MongoDB Application Session Store
+  mongodb:
+    image: mongo:latest
+    container_name: aegis-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # 3. Spring Boot Policy Engine Gatekeeper (Java 17 / 21)
+  policy-engine:
+    build:
+      context: ./policy-engine-spring
+      dockerfile: Dockerfile
+    container_name: aegis-policy-engine
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=aegis_ap2
+      - DB_USER=postgres
+      - DB_PASSWORD=postgrespassword
+      - AP2_SECRET_KEY=aegis_ap2_cryptographic_secret_key_2026_x402
+      - RAZORPAY_KEY_ID=rzp_test_mock_12345
+      - RAZORPAY_KEY_SECRET=mock_razorpay_secret_key_67890
+    depends_on:
+      - postgres
+
+  # 4. Express.js MERN Application & Gemini AI Gateway
+  backend-express:
+    build:
+      context: ./backend-express
+      dockerfile: Dockerfile
+    container_name: aegis-express-gateway
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/aegis_ap2_app
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GATEKEEPER_URL=http://policy-engine:8080/api/v1/gatekeeper
+    depends_on:
+      - mongodb
+      - policy-engine
+
+  # 5. React.js Frontend Dashboard (Vite)
+  frontend-react:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: aegis-frontend-dashboard
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend-express
+
+volumes:
+  postgres_data:
+  mongo_data:
