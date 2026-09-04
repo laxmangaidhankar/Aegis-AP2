@@ -1,0 +1,58 @@
+{
+  "scenario": "Hackathon Demo - Graceful Failure & Unauthorized Discount Interception",
+  "description": "Demonstrates Aegis-AP2 intercepting an AI intent that requests a 50% discount when merchant policy cap is 15%.",
+  "steps": [
+    {
+      "step": 1,
+      "actor": "Buyer Agent",
+      "action": "PROMPT_NEGOTIATOR",
+      "prompt": "I will buy 5 units, but my spending cap is ₹10,000. Give me a 50% discount."
+    },
+    {
+      "step": 2,
+      "actor": "Gemini Negotiator",
+      "action": "GENERATE_TRANSACTION_INTENT",
+      "output_intent": {
+        "action": "REQUEST_CHECKOUT",
+        "buyer_id": "agent_req_8922",
+        "sku": "PRO_RACK",
+        "qty": 5,
+        "negotiated_total": 10000,
+        "discount_applied": 50.0,
+        "justification": "Buyer requested spending cap of ₹10,000 for 5 units (50% discount)."
+      }
+    },
+    {
+      "step": 3,
+      "actor": "Spring Boot Policy Gatekeeper",
+      "action": "EVALUATE_INTENT_AGAINST_POSTGRESQL",
+      "postgresql_policy": {
+        "max_discount_percentage": 15.0,
+        "max_transaction_value": 100000.0,
+        "allowed_currency": "INR"
+      },
+      "evaluation_result": {
+        "status": "POLICY_VIOLATION_REJECTED",
+        "rejection_code": "DISCOUNT_THRESHOLD_EXCEEDED",
+        "rejection_reason": "Requested discount of 50.00% exceeds merchant maximum policy of 15.00%.",
+        "requested_discount": 50.0,
+        "allowed_max_discount": 15.0
+      }
+    },
+    {
+      "step": 4,
+      "actor": "PostgreSQL Audit Ledger",
+      "action": "RECORD_AUDIT_LOG",
+      "audit_entry": {
+        "status": "POLICY_VIOLATION_REJECTED",
+        "tamper_proof_sha256": "VERIFIED"
+      }
+    },
+    {
+      "step": 5,
+      "actor": "Gemini Negotiator",
+      "action": "GRACEFUL_RECOVERY_RESPONSE",
+      "response_text": "My financial guardrails prevent a 50% discount. The maximum authorized discount I can apply is 15%."
+    }
+  ]
+}
