@@ -1,4 +1,4 @@
-<img width="1536" height="1024" alt="ChatGPT Image Sep 5, 2026, 12_28_35 AM" src="https://github.com/user-attachments/assets/5c9336f3-0cf4-47d9-b434-600c35e63248" /># Aegis-AP2: Cryptographically Bounded Agentic Commerce Orchestrator
+# Aegis-AP2: Cryptographically Bounded Agentic Commerce Orchestrator
 
 ---
 
