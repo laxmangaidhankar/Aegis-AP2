@@ -1,4 +1,4 @@
-# Aegis-AP2: Cryptographically Bounded Agentic Commerce Orchestrator
+<img width="1536" height="1024" alt="ChatGPT Image Sep 5, 2026, 12_28_35 AM" src="https://github.com/user-attachments/assets/5c9336f3-0cf4-47d9-b434-600c35e63248" /># Aegis-AP2: Cryptographically Bounded Agentic Commerce Orchestrator
 
 ---
 
@@ -19,6 +19,7 @@ AI Proposes  ──►  Spring Gatekeeper Validates  ──►  Signed AP2 Manda
 ---
 
 ## 2. Core Architecture: The "Split-Brain" Design
+<img width="1536" height="1024" alt="Aegis-AP2" src="https://github.com/user-attachments/assets/8836b401-9860-4919-9633-4eafea333005" />
 
 Aegis-AP2 operates on a strict separation of concerns to guarantee an **Explainable, Bounded, and Gated** execution environment.
 
@@ -77,6 +78,8 @@ Aegis-AP2 operates on a strict separation of concerns to guarantee an **Explaina
 | **Node/Express Gateway** | Manage chat history, session state, routing, forward intents to Gatekeeper. | Override Gatekeeper decisions, issue signed mandates, directly execute payment ops. |
 | **Spring Boot Gatekeeper** | Evaluate `Transaction_Intent` against PostgreSQL rules, hold Razorpay credentials, issue signed AP2 mandates. | Alter buyer text, execute without policy compliance. |
 | **PostgreSQL Ledger** | Store merchant guardrails (`MAX_DISCOUNT_PERCENTAGE`), log audit decisions with SHA-256 hash chains. | Authorize payments without Gatekeeper logic. |
+
+
 
 ---
 
